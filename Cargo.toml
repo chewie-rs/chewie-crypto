@@ -1,0 +1,21 @@
+[package]
+name = "chewie-crypto"
+version = "0.1.0"
+edition = "2024"
+description = "Cryptographic primitives and secret management for Rust applications"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/chewie-rs/chewie-crypto"
+documentation = "https://docs.rs/chewie-crypto"
+keywords = ["crypto", "signing", "encryption", "secrets", "kms"]
+categories = ["cryptography", "authentication"]
+readme = "README.md"
+
+[dependencies]
+base64 = "0.22"
+bytes = "1"
+hex = "0.4"
+secrecy = "0.10"
+snafu = { version = "0.8", features = ["rust_1_81"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(native)", "cfg(wasm_wasi)", "cfg(wasm_browser)"] }
