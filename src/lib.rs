@@ -12,6 +12,6 @@
 // Platform-specific marker traits
 mod platform;
 pub use platform::{MaybeSend, MaybeSendSync, MaybeSync};
-
+pub mod prelude;
 pub mod secrets;
 pub mod signer;

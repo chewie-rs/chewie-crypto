@@ -4,7 +4,7 @@ use snafu::prelude::*;
 
 use crate::MaybeSendSync;
 
-/// Error when decoding a secret.
+/// Errors that can occur when decoding a secret.
 #[derive(Debug, Snafu)]
 #[non_exhaustive]
 pub enum EncodingError {

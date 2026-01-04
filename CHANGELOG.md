@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Prelude including traits which provide extra syntax.
+- Add JwsSigner/JwsSignerSync which adds the JWS algorithm on top of basic signer abilities.
+
 ## [0.1.0] - 2026-01-04
 
 ### Added
