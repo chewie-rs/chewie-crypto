@@ -19,3 +19,11 @@ pub trait SignerSync: MaybeSendSync + Clone {
     /// Returns an error if the signing operation fails.
     fn sign_sync(&self, input: &[u8]) -> Result<Bytes, Self::Error>;
 }
+
+/// Trait for signers that produce RFC 7515 (JWS) / RFC 7518 (JWA) compatible signatures (synchronous).
+pub trait JwsSignerSync: SignerSync {
+    /// Returns the JWS algorithm identifier.
+    ///
+    /// This is specifically for use in the JWT `alg` header parameter.
+    fn jws_algorithm(&self) -> &str;
+}
