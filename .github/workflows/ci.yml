@@ -64,3 +64,18 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo check
       - run: cargo check --all-features
+
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.88
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - run: cargo llvm-cov --all-features --workspace --codecov --output-path codecov.info
+      - uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          files: codecov.info
+          use_oidc: true
