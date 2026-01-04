@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-01-04
+
 ### Added
 
 - Async and sync signer traits.
@@ -14,3 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Secret encoding trait.
 - Binary, string, base64, hex secret encodings.
 - Auto-selection of send/sync based on platform.
+
+[unreleased]: https://github.com/chewie-rs/chewie-crypto/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/chewie-rs/chewie-crypto/tag/v0.1.0
