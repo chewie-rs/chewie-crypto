@@ -106,3 +106,70 @@ impl SecretEncoding for Base64Encoding {
         Ok(SecretBox::new(decoded.into_boxed_slice()))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use secrecy::ExposeSecret;
+
+    #[test]
+    fn string_encoding_valid_utf8() {
+        let result = StringEncoding.decode(b"hello world").unwrap();
+        assert_eq!(result.expose_secret(), "hello world");
+    }
+
+    #[test]
+    fn string_encoding_trims_whitespace() {
+        let result = StringEncoding.decode(b"  hello  \n").unwrap();
+        assert_eq!(result.expose_secret(), "hello");
+    }
+
+    #[test]
+    fn string_encoding_invalid_utf8() {
+        let result = StringEncoding.decode(&[0xff, 0xfe]);
+        assert!(matches!(result, Err(EncodingError::InvalidUtf8 { .. })));
+    }
+
+    #[test]
+    fn binary_encoding_passthrough() {
+        let bytes = &[0x00, 0x01, 0x02, 0xff];
+        let result = BinaryEncoding.decode(bytes).unwrap();
+        assert_eq!(result.expose_secret(), bytes);
+    }
+
+    #[test]
+    fn hex_encoding_valid() {
+        let result = HexEncoding.decode(b"deadbeef").unwrap();
+        assert_eq!(result.expose_secret(), &[0xde, 0xad, 0xbe, 0xef]);
+    }
+
+    #[test]
+    fn hex_encoding_trims_whitespace() {
+        let result = HexEncoding.decode(b"  deadbeef  \n").unwrap();
+        assert_eq!(result.expose_secret(), &[0xde, 0xad, 0xbe, 0xef]);
+    }
+
+    #[test]
+    fn hex_encoding_invalid() {
+        let result = HexEncoding.decode(b"not hex!");
+        assert!(matches!(result, Err(EncodingError::InvalidHex { .. })));
+    }
+
+    #[test]
+    fn base64_encoding_valid() {
+        let result = Base64Encoding.decode(b"SGVsbG8gV29ybGQ=").unwrap();
+        assert_eq!(result.expose_secret(), b"Hello World");
+    }
+
+    #[test]
+    fn base64_encoding_trims_whitespace() {
+        let result = Base64Encoding.decode(b"  SGVsbG8gV29ybGQ=  \n").unwrap();
+        assert_eq!(result.expose_secret(), b"Hello World");
+    }
+
+    #[test]
+    fn base64_encoding_invalid() {
+        let result = Base64Encoding.decode(b"not valid base64!");
+        assert!(matches!(result, Err(EncodingError::InvalidBase64 { .. })));
+    }
+}
