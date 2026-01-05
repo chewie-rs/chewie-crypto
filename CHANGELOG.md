@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Re-exported secrecy and bytes types as they are part of the public API.
 
+### Breaking
+
+- Renamed `SecretSource` to `Secret`.
+- Renamed `SecretEncoding` to `SecretDecoder`.
+- Renamed `EncodingError` to `DecodingError`.
+- Renamed `SecretSourceError` to `SecretAccessError`.
+- Renamed `EnvVarSecretSource` to `EnvVarSecret`.
+- Renamed `Secret::get_secret` to `Secret::get_secret_value`.
+
 ## [0.2.0] - 2026-01-04
 
 ### Added
