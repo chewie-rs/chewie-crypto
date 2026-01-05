@@ -9,9 +9,12 @@
 //! Cryptographic trait definitions for Rust applications, optimized for
 //! OAuth 2.0 and `OpenID` Connect.
 
-// Platform-specific marker traits
 mod platform;
 pub use platform::{MaybeSend, MaybeSendSync, MaybeSync};
 pub mod prelude;
 pub mod secrets;
 pub mod signer;
+
+// Re-exports
+pub use bytes::Bytes;
+pub use secrecy::{ExposeSecret, SecretBox, SecretString};
