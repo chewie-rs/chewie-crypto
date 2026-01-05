@@ -1,4 +1,4 @@
 //! Prelude for crypto trait methods.
 
 pub use crate::secrets::Secret;
-pub use crate::signer::{JwsSigner, JwsSignerSync, Signer, SignerSync};
+pub use crate::signer::{JwsSigner, JwsSignerSync, SignedBytes};
