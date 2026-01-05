@@ -5,13 +5,13 @@ use std::ffi::OsString;
 use snafu::prelude::*;
 
 use crate::secrets::{
-    EncodingError, SecretSource,
-    encoding::{SecretEncoding, StringEncoding},
+    DecodingError, Secret,
+    encodings::{SecretDecoder, StringEncoding},
 };
 
-/// Errors that can occur when using built-in secret providers.
+/// Errors that can occur when using built-in secret implementations.
 #[derive(Debug, Snafu)]
-pub enum SecretSourceError {
+pub enum SecretAccessError {
     /// The environment variable was not found or was not valid unicode.
     #[snafu(display("Failed to read env variable '{}'", var_name.to_string_lossy()))]
     EnvAccess {
@@ -24,20 +24,20 @@ pub enum SecretSourceError {
     #[snafu(display("Failed to decode secret"))]
     Decode {
         /// The encoding error.
-        source: EncodingError,
+        source: DecodingError,
     },
 }
 
 /// Retrieves secrets from environment variables with configurable encoding.
 #[derive(Debug, Clone)]
-pub struct EnvVarSecretSource<E: SecretEncoding = StringEncoding> {
+pub struct EnvVarSecret<E: SecretDecoder = StringEncoding> {
     /// The name of the environment variable containing the secret.
     var_name: OsString,
     /// The encoding of the secret.
     encoding: E,
 }
 
-impl<E: SecretEncoding> EnvVarSecretSource<E> {
+impl<E: SecretDecoder> EnvVarSecret<E> {
     /// Creates a new environment variable secret provider with the specified encoding.
     pub fn new(var_name: impl Into<OsString>, encoding: E) -> Self {
         Self {
@@ -47,18 +47,18 @@ impl<E: SecretEncoding> EnvVarSecretSource<E> {
     }
 }
 
-impl EnvVarSecretSource<StringEncoding> {
+impl EnvVarSecret<StringEncoding> {
     /// Creates a new environment variable secret provider returning a `SecretString`.
     pub fn string(var_name: impl Into<OsString>) -> Self {
         Self::new(var_name, StringEncoding)
     }
 }
 
-impl<E: SecretEncoding> SecretSource for EnvVarSecretSource<E> {
+impl<E: SecretDecoder> Secret for EnvVarSecret<E> {
     type Output = E::Output;
-    type Error = SecretSourceError;
+    type Error = SecretAccessError;
 
-    async fn get_secret(&self) -> Result<E::Output, Self::Error> {
+    async fn get_secret_value(&self) -> Result<E::Output, Self::Error> {
         let var_name = self.var_name.clone();
         let value = std::env::var(&self.var_name).context(EnvAccessSnafu { var_name })?;
         self.encoding.decode(value.as_bytes()).context(DecodeSnafu)

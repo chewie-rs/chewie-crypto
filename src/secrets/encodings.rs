@@ -7,7 +7,7 @@ use crate::MaybeSendSync;
 /// Errors that can occur when decoding a secret.
 #[derive(Debug, Snafu)]
 #[non_exhaustive]
-pub enum EncodingError {
+pub enum DecodingError {
     /// The bytes are not valid UTF-8.
     #[snafu(display("Invalid UTF-8"))]
     InvalidUtf8 {
@@ -29,7 +29,7 @@ pub enum EncodingError {
 }
 
 /// Trait for decoding raw bytes into a typed secret.
-pub trait SecretEncoding: MaybeSendSync + Clone {
+pub trait SecretDecoder: MaybeSendSync + Clone {
     /// The type of secret this encoding produces.
     type Output: MaybeSendSync + Clone;
 
@@ -39,7 +39,7 @@ pub trait SecretEncoding: MaybeSendSync + Clone {
     ///
     /// Returns an error if the bytes cannot be decoded (e.g., invalid UTF-8,
     /// invalid hex characters).
-    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, EncodingError>;
+    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, DecodingError>;
 }
 
 /// Interprets bytes as UTF-8 text, returning a `SecretString`.
@@ -48,10 +48,10 @@ pub trait SecretEncoding: MaybeSendSync + Clone {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct StringEncoding;
 
-impl SecretEncoding for StringEncoding {
+impl SecretDecoder for StringEncoding {
     type Output = SecretString;
 
-    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, EncodingError> {
+    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, DecodingError> {
         let s = std::str::from_utf8(bytes).context(InvalidUtf8Snafu)?;
         Ok(SecretString::from(s.trim().to_string()))
     }
@@ -63,10 +63,10 @@ impl SecretEncoding for StringEncoding {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct BinaryEncoding;
 
-impl SecretEncoding for BinaryEncoding {
+impl SecretDecoder for BinaryEncoding {
     type Output = SecretBox<[u8]>;
 
-    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, EncodingError> {
+    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, DecodingError> {
         Ok(SecretBox::new(bytes.to_vec().into_boxed_slice()))
     }
 }
@@ -78,10 +78,10 @@ impl SecretEncoding for BinaryEncoding {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct HexEncoding;
 
-impl SecretEncoding for HexEncoding {
+impl SecretDecoder for HexEncoding {
     type Output = SecretBox<[u8]>;
 
-    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, EncodingError> {
+    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, DecodingError> {
         let s = std::str::from_utf8(bytes).context(InvalidUtf8Snafu)?;
         let decoded = hex::decode(s.trim()).context(InvalidHexSnafu)?;
         Ok(SecretBox::new(decoded.into_boxed_slice()))
@@ -95,10 +95,10 @@ impl SecretEncoding for HexEncoding {
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Base64Encoding;
 
-impl SecretEncoding for Base64Encoding {
+impl SecretDecoder for Base64Encoding {
     type Output = SecretBox<[u8]>;
 
-    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, EncodingError> {
+    fn decode(&self, bytes: &[u8]) -> Result<Self::Output, DecodingError> {
         let s = std::str::from_utf8(bytes).context(InvalidUtf8Snafu)?;
         let decoded = base64::engine::general_purpose::STANDARD
             .decode(s.trim())
@@ -127,7 +127,7 @@ mod tests {
     #[test]
     fn string_encoding_invalid_utf8() {
         let result = StringEncoding.decode(&[0xff, 0xfe]);
-        assert!(matches!(result, Err(EncodingError::InvalidUtf8 { .. })));
+        assert!(matches!(result, Err(DecodingError::InvalidUtf8 { .. })));
     }
 
     #[test]
@@ -152,7 +152,7 @@ mod tests {
     #[test]
     fn hex_encoding_invalid() {
         let result = HexEncoding.decode(b"not hex!");
-        assert!(matches!(result, Err(EncodingError::InvalidHex { .. })));
+        assert!(matches!(result, Err(DecodingError::InvalidHex { .. })));
     }
 
     #[test]
@@ -170,6 +170,6 @@ mod tests {
     #[test]
     fn base64_encoding_invalid() {
         let result = Base64Encoding.decode(b"not valid base64!");
-        assert!(matches!(result, Err(EncodingError::InvalidBase64 { .. })));
+        assert!(matches!(result, Err(DecodingError::InvalidBase64 { .. })));
     }
 }
