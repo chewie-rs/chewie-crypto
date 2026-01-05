@@ -1,29 +1,22 @@
 //! Synchronous cryptographic signing traits.
 
-use crate::MaybeSendSync;
+use crate::{MaybeSendSync, signer::SignedBytes};
 
-use bytes::Bytes;
-
-/// Base trait for cryptographic signing operations (synchronous).
-pub trait SignerSync: MaybeSendSync + Clone {
+/// Trait for signers that produce RFC 7515 (JWS) / RFC 7518 (JWA) compatible signatures (synchronous).
+pub trait JwsSignerSync: MaybeSendSync + Clone {
     /// The error type returned by this signer's operations.
     type Error: std::error::Error + MaybeSendSync + 'static;
 
     /// Returns a descriptive name for the algorithm used by this signer.
     fn algorithm(&self) -> &str;
 
-    /// Synchronously signs the given input data and returns the raw signature bytes.
+    /// Signs the given input data and returns the signature with metadata.
+    ///
+    /// The returned [`SignedBytes`] contains the JWA-compatible signature
+    /// along with the algorithm and key ID used.
     ///
     /// # Errors
     ///
     /// Returns an error if the signing operation fails.
-    fn sign_sync(&self, input: &[u8]) -> Result<Bytes, Self::Error>;
-}
-
-/// Trait for signers that produce RFC 7515 (JWS) / RFC 7518 (JWA) compatible signatures (synchronous).
-pub trait JwsSignerSync: SignerSync {
-    /// Returns the JWS algorithm identifier.
-    ///
-    /// This is specifically for use in the JWT `alg` header parameter.
-    fn jws_algorithm(&self) -> &str;
+    fn sign(&self, input: &[u8]) -> Result<SignedBytes, Self::Error>;
 }
