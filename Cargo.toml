@@ -1,6 +1,6 @@
 [package]
 name = "chewie-crypto"
-version = "0.3.0-pre"
+version = "0.3.0"
 edition = "2024"
 description = "Cryptographic primitives and secret management for Rust applications"
 license = "MIT OR Apache-2.0"
@@ -18,7 +18,7 @@ secrecy = "0.10"
 snafu = { version = "0.8", features = ["rust_1_81"] }
 
 [dev-dependencies]
-tokio = { version = "1.49.0", default-features = false, features = ["macros", "rt-multi-thread", "test-util"] }
+tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread", "test-util"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ["cfg(native)", "cfg(wasm_wasi)", "cfg(wasm_browser)"] }
