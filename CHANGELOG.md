@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Re-exported secrecy and bytes types as they are part of the public API.
-- Added `JwsSigner::key_id`
-- Added `JwsSigner::sign_unchecked`
+- Added `JwsSigner::key_id`.
+- Added `JwsSigner::sign_unchecked`.
+- Added a blanket implementation of JwsSigner for JwsSignerSync.
 
 ### Breaking
 

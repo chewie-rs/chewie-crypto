@@ -17,5 +17,8 @@ hex = "0.4"
 secrecy = "0.10"
 snafu = { version = "0.8", features = ["rust_1_81"] }
 
+[dev-dependencies]
+tokio = { version = "1.49.0", default-features = false, features = ["macros", "rt-multi-thread", "test-util"] }
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ["cfg(native)", "cfg(wasm_wasi)", "cfg(wasm_browser)"] }
