@@ -78,15 +78,15 @@ mod tests {
     impl JwsSignerSync for MockSigner {
         type Error = Infallible;
 
-        fn algorithm(&self) -> std::borrow::Cow<'_, str> {
+        fn algorithm_sync(&self) -> std::borrow::Cow<'_, str> {
             "ALG".into()
         }
 
-        fn jws_algorithm(&self) -> std::borrow::Cow<'_, str> {
+        fn jws_algorithm_sync(&self) -> std::borrow::Cow<'_, str> {
             "JWS-ALG".into()
         }
 
-        fn key_id(&self) -> Option<std::borrow::Cow<'_, str>> {
+        fn key_id_sync(&self) -> Option<std::borrow::Cow<'_, str>> {
             None
         }
 

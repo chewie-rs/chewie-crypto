@@ -19,12 +19,12 @@ pub trait JwsSignerSync: MaybeSendSync + Clone {
     type Error: std::error::Error + MaybeSendSync + 'static;
 
     /// Returns a descriptive name for the algorithm used by this signer.
-    fn algorithm(&self) -> Cow<'_, str>;
+    fn algorithm_sync(&self) -> Cow<'_, str>;
 
     /// Returns the JWS algorithm identifier.
     ///
     /// This is specifically for use in the JWT `alg` header parameter.
-    fn jws_algorithm(&self) -> Cow<'_, str>;
+    fn jws_algorithm_sync(&self) -> Cow<'_, str>;
 
     /// Returns the key ID of the signer.
     ///
@@ -32,7 +32,7 @@ pub trait JwsSignerSync: MaybeSendSync + Clone {
     ///
     /// Note: The "natural" key ID is not always directly suitable as a
     /// `kid` value, and may require transformation before use.
-    fn key_id(&self) -> Option<Cow<'_, str>>;
+    fn key_id_sync(&self) -> Option<Cow<'_, str>>;
 
     /// Signs the given input data and returns the signature.
     ///
@@ -67,15 +67,15 @@ impl<Sgn: JwsSignerSync> JwsSigner for Sgn {
     type Error = Sgn::Error;
 
     fn algorithm(&self) -> Cow<'_, str> {
-        JwsSignerSync::algorithm(self)
+        self.algorithm_sync()
     }
 
     fn jws_algorithm(&self) -> Cow<'_, str> {
-        JwsSignerSync::jws_algorithm(self)
+        self.jws_algorithm_sync()
     }
 
     fn key_id(&self) -> Option<Cow<'_, str>> {
-        JwsSignerSync::key_id(self)
+        self.key_id_sync()
     }
 
     fn sign_unchecked(
@@ -98,15 +98,15 @@ mod tests {
     impl JwsSignerSync for MockSigner {
         type Error = Infallible;
 
-        fn algorithm(&self) -> std::borrow::Cow<'_, str> {
+        fn algorithm_sync(&self) -> std::borrow::Cow<'_, str> {
             "ALG".into()
         }
 
-        fn jws_algorithm(&self) -> std::borrow::Cow<'_, str> {
+        fn jws_algorithm_sync(&self) -> std::borrow::Cow<'_, str> {
             "JWS-ALG".into()
         }
 
-        fn key_id(&self) -> Option<std::borrow::Cow<'_, str>> {
+        fn key_id_sync(&self) -> Option<std::borrow::Cow<'_, str>> {
             None
         }
 
@@ -117,24 +117,21 @@ mod tests {
 
     #[test]
     fn test_algorithm_through_blanket_impl() {
-        assert_eq!(JwsSigner::algorithm(&MockSigner), "ALG");
+        assert_eq!(MockSigner.algorithm(), "ALG");
     }
 
     #[test]
     fn test_jws_algorithm_through_blanket_impl() {
-        assert_eq!(JwsSigner::jws_algorithm(&MockSigner), "JWS-ALG");
+        assert_eq!(MockSigner.jws_algorithm(), "JWS-ALG");
     }
 
     #[test]
     fn test_key_id_algorithm_through_blanket_impl() {
-        assert_eq!(JwsSigner::key_id(&MockSigner), None);
+        assert_eq!(MockSigner.key_id(), None);
     }
 
     #[tokio::test]
     async fn test_sign_through_blanket_impl() {
-        assert!(matches!(
-            JwsSigner::sign(&MockSigner, &[], "JWS-ALG", None).await,
-            Ok(_)
-        ));
+        assert!(matches!(MockSigner.sign(&[], "JWS-ALG", None).await, Ok(_)));
     }
 }

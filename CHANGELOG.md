@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
+### Added
 
-- Re-exported secrecy and bytes types as they are part of the public API.
 - Added `JwsSigner::key_id`.
 - Added `JwsSigner::sign_unchecked`.
 - Added a blanket implementation of JwsSigner for JwsSignerSync.
+
+### Changed
+
+- Re-exported secrecy and bytes types as they are part of the public API.
 
 ### Breaking
 
@@ -24,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `Secret::get_secret` to `Secret::get_secret_value`.
 - Removed `Signer` trait.
 - `JwsSigner::sign` now takes `jws_algorithm`/`key_id`.
-- `JwsSignerSync::sign` renamed to `sign_sync`.
+- Renamed `JwsSignerSync` methods with `_sync` suffix.
 
 ## [0.2.0] - 2026-01-04
 
