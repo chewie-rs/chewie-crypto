@@ -6,8 +6,11 @@ use bytes::Bytes;
 use snafu::prelude::*;
 
 use crate::{
-    MaybeSendSync,
-    signer::error::{MismatchedKeyInfoSnafu, UnderlyingSnafu},
+    MaybeSend, MaybeSendSync,
+    signer::{
+        JwsSigner,
+        error::{MismatchedKeyInfoSnafu, UnderlyingSnafu},
+    },
 };
 
 /// Trait for signers that produce RFC 7515 (JWS) / RFC 7518 (JWA) compatible signatures (synchronous).
@@ -57,5 +60,81 @@ pub trait JwsSignerSync: MaybeSendSync + Clone {
         } else {
             self.sign_unchecked(input).context(UnderlyingSnafu)
         }
+    }
+}
+
+impl<Sgn: JwsSignerSync> JwsSigner for Sgn {
+    type Error = Sgn::Error;
+
+    fn algorithm(&self) -> Cow<'_, str> {
+        JwsSignerSync::algorithm(self)
+    }
+
+    fn jws_algorithm(&self) -> Cow<'_, str> {
+        JwsSignerSync::jws_algorithm(self)
+    }
+
+    fn key_id(&self) -> Option<Cow<'_, str>> {
+        JwsSignerSync::key_id(self)
+    }
+
+    fn sign_unchecked(
+        &self,
+        input: &[u8],
+    ) -> impl Future<Output = Result<Bytes, Self::Error>> + MaybeSend {
+        std::future::ready(JwsSignerSync::sign_unchecked(self, input))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::convert::Infallible;
+
+    use crate::signer::{JwsSigner, JwsSignerSync};
+
+    #[derive(Debug, Clone)]
+    struct MockSigner;
+
+    impl JwsSignerSync for MockSigner {
+        type Error = Infallible;
+
+        fn algorithm(&self) -> std::borrow::Cow<'_, str> {
+            "ALG".into()
+        }
+
+        fn jws_algorithm(&self) -> std::borrow::Cow<'_, str> {
+            "JWS-ALG".into()
+        }
+
+        fn key_id(&self) -> Option<std::borrow::Cow<'_, str>> {
+            None
+        }
+
+        fn sign_unchecked(&self, _input: &[u8]) -> Result<bytes::Bytes, Self::Error> {
+            Ok(bytes::Bytes::new())
+        }
+    }
+
+    #[test]
+    fn test_algorithm_through_blanket_impl() {
+        assert_eq!(JwsSigner::algorithm(&MockSigner), "ALG");
+    }
+
+    #[test]
+    fn test_jws_algorithm_through_blanket_impl() {
+        assert_eq!(JwsSigner::jws_algorithm(&MockSigner), "JWS-ALG");
+    }
+
+    #[test]
+    fn test_key_id_algorithm_through_blanket_impl() {
+        assert_eq!(JwsSigner::key_id(&MockSigner), None);
+    }
+
+    #[tokio::test]
+    async fn test_sign_through_blanket_impl() {
+        assert!(matches!(
+            JwsSigner::sign(&MockSigner, &[], "JWS-ALG", None).await,
+            Ok(_)
+        ));
     }
 }
