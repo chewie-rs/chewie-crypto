@@ -1,9 +1,7 @@
 //! Cryptographic signing traits.
 
-mod r#async;
 mod error;
-mod sync;
+mod r#trait;
 
-pub use r#async::JwsSigner;
 pub use error::Error;
-pub use sync::JwsSignerSync;
+pub use r#trait::JwsSigner;

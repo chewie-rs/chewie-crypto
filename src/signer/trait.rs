@@ -70,41 +70,42 @@ pub trait JwsSigner: MaybeSendSync + Clone {
 mod tests {
     use std::convert::Infallible;
 
-    use crate::signer::JwsSignerSync;
+    use crate::signer::JwsSigner;
 
     #[derive(Debug, Clone)]
     struct MockSigner;
 
-    impl JwsSignerSync for MockSigner {
+    impl JwsSigner for MockSigner {
         type Error = Infallible;
 
-        fn algorithm_sync(&self) -> std::borrow::Cow<'_, str> {
+        fn algorithm(&self) -> std::borrow::Cow<'_, str> {
             "ALG".into()
         }
 
-        fn jws_algorithm_sync(&self) -> std::borrow::Cow<'_, str> {
+        fn jws_algorithm(&self) -> std::borrow::Cow<'_, str> {
             "JWS-ALG".into()
         }
 
-        fn key_id_sync(&self) -> Option<std::borrow::Cow<'_, str>> {
+        fn key_id(&self) -> Option<std::borrow::Cow<'_, str>> {
             None
         }
 
-        fn sign_unchecked(&self, _input: &[u8]) -> Result<bytes::Bytes, Self::Error> {
+        async fn sign_unchecked(&self, _input: &[u8]) -> Result<bytes::Bytes, Self::Error> {
             Ok(bytes::Bytes::new())
         }
     }
 
-    #[test]
-    fn test_metadata_no_mismatch_succeeds() {
+    #[tokio::test]
+    async fn test_metadata_no_mismatch_succeeds() {
         MockSigner
-            .sign_sync(&[], "JWS-ALG", None)
+            .sign(&[], "JWS-ALG", None)
+            .await
             .expect("no mismatch");
     }
 
-    #[test]
-    fn test_metadata_different_alg_fails() {
-        let result = MockSigner.sign_sync(&[], "JWS-ALG2", None);
+    #[tokio::test]
+    async fn test_metadata_different_alg_fails() {
+        let result = MockSigner.sign(&[], "JWS-ALG2", None).await;
 
         assert!(matches!(
             result,
@@ -112,9 +113,9 @@ mod tests {
         ))
     }
 
-    #[test]
-    fn test_metadata_different_kid_fails() {
-        let result = MockSigner.sign_sync(&[], "JWS-ALG", Some("key-id"));
+    #[tokio::test]
+    async fn test_metadata_different_kid_fails() {
+        let result = MockSigner.sign(&[], "JWS-ALG", Some("key-id")).await;
 
         assert!(matches!(
             result,
