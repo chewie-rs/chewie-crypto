@@ -9,6 +9,7 @@
 //! Cryptographic trait definitions for Rust applications, optimized for
 //! OAuth 2.0 and `OpenID` Connect.
 
+pub mod jwk;
 mod platform;
 pub use platform::{MaybeSend, MaybeSendSync, MaybeSync};
 pub mod prelude;

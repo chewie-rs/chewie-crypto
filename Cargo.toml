@@ -12,12 +12,16 @@ readme = "README.md"
 
 [dependencies]
 base64 = "0.22"
+bon = { version = "3.8", features = ["implied-bounds"] }
 bytes = "1"
 hex = "0.4"
 secrecy = "0.10"
+serde = { version = "1.0.164", features = ["derive"] }
+sha2 = "0.10"
 snafu = { version = "0.8", features = ["rust_1_81"] }
 
 [dev-dependencies]
+serde_json = "1"
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread", "test-util"] }
 
 [lints.rust]

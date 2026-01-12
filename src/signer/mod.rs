@@ -4,4 +4,4 @@ mod error;
 mod r#trait;
 
 pub use error::Error;
-pub use r#trait::JwsSigner;
+pub use r#trait::{HasPublicKey, JwsSigner};

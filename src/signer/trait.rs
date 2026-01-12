@@ -7,6 +7,7 @@ use snafu::prelude::*;
 
 use crate::{
     MaybeSend, MaybeSendSync,
+    jwk::PublicJwk,
     signer::error::{MismatchedKeyInfoSnafu, UnderlyingSnafu},
 };
 
@@ -64,6 +65,12 @@ pub trait JwsSigner: MaybeSendSync + Clone {
             }
         }
     }
+}
+
+/// Trait for asymmetric keys that provides its public key in JWK (RFC 7517) format.
+pub trait HasPublicKey: MaybeSendSync + Clone {
+    /// Returns the public key for this asymmetric key as a JSON Web Key.
+    fn public_key_jwk(&self) -> &PublicJwk;
 }
 
 #[cfg(test)]
